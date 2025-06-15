@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: areca-shop
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn areca_shop.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: areca_shop.settings
+      - key: PYTHON_VERSION
+        value: 3.11

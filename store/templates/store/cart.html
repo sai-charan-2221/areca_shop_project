@@ -1,0 +1,121 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .quantity-controls button {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-success">
+            <i class="fas fa-shopping-cart"></i> Your Cart
+        </h2>
+        <div>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary me-2">⬅️ Back to Home</a>
+            <a href="{% url 'product_list' %}" class="btn btn-success">
+                🌿 Select More Products
+            </a>
+        </div>
+    </div>
+
+    {% if cart_items %}
+    <table class="table table-bordered bg-white rounded">
+        <thead class="thead-light">
+            <tr>
+                <th>Product</th>
+                <th style="width: 120px;">Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr data-id="{{ item.product.id }}">
+                <td>{{ item.product.name }}</td>
+                <td class="text-center">
+                    <div class="quantity-controls">
+                        <button class="btn btn-sm btn-secondary decrease">-</button>
+                        <input type="number" value="{{ item.quantity }}" min="1"
+                               class="form-control quantity" style="width: 50px;">
+                        <button class="btn btn-sm btn-secondary increase">+</button>
+                    </div>
+                </td>
+                <td>₹<span class="unit-price">{{ item.product.price|floatformat:2 }}</span></td>
+                <td>₹<span class="item-total">{{ item.subtotal|floatformat:2 }}</span></td>
+                <td>
+                    <form method="post" action="{% url 'view_cart' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                        <button name="action" value="remove" class="btn btn-sm btn-danger">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-end mt-4">
+        <h4>Total: ₹<span id="cart-total">{{ total|floatformat:2 }}</span></h4>
+    </div>
+
+    <div class="text-end">
+        <a href="{% url 'place_order' %}" class="btn btn-primary mt-3">Place Order</a>
+    </div>
+
+    {% else %}
+    <p>Your cart is empty. <a href="{% url 'product_list' %}">Start shopping!</a></p>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function updateCartTotal() {
+        let total = 0;
+        document.querySelectorAll("tr[data-id]").forEach(row => {
+            const price = parseFloat(row.querySelector(".unit-price").textContent);
+            const quantity = parseInt(row.querySelector(".quantity").value);
+            const itemTotal = price * quantity;
+            row.querySelector(".item-total").textContent = itemTotal.toFixed(2);
+            total += itemTotal;
+        });
+        document.getElementById("cart-total").textContent = total.toFixed(2);
+    }
+
+    document.querySelectorAll(".increase").forEach(button => {
+        button.addEventListener("click", function () {
+            const input = this.parentElement.querySelector(".quantity");
+            input.value = parseInt(input.value) + 1;
+            updateCartTotal();
+        });
+    });
+
+    document.querySelectorAll(".decrease").forEach(button => {
+        button.addEventListener("click", function () {
+            const input = this.parentElement.querySelector(".quantity");
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateCartTotal();
+            }
+        });
+    });
+
+    document.querySelectorAll(".quantity").forEach(input => {
+        input.addEventListener("change", function () {
+            if (parseInt(this.value) < 1) this.value = 1;
+            updateCartTotal();
+        });
+    });
+});
+</script>
+{% endblock %}

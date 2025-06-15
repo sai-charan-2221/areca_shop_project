@@ -1,0 +1,204 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% load cart_extras %}
+
+{% block content %}
+<style>
+    body {
+        background: url("{% static 'store/images/areca-bg.png' %}") no-repeat center center fixed;
+        background-size: cover;
+        color: #f8f9fa;
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.03);
+        padding: 30px;
+        border-radius: 10px;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: white !important;
+    }
+
+    .btn-success:hover {
+        background-color: #218838 !important;
+    }
+
+    .btn-danger {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+
+    .product-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-control {
+        width: 60px;
+        text-align: center;
+    }
+</style>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function updateCartVisibility() {
+    const viewCartBtn = document.getElementById('view-cart-btn');
+    let totalItems = 0;
+
+    document.querySelectorAll('[id^="qty-quantity-"]').forEach(input => {
+        const qty = parseInt(input.value);
+        if (!isNaN(qty) && qty > 0) {
+            totalItems += qty;
+        }
+    });
+
+    if (totalItems > 0) {
+        viewCartBtn.style.display = 'inline-block';
+    } else {
+        viewCartBtn.style.display = 'none';
+    }
+
+    console.log("Cart item count:", totalItems);
+}
+
+function addToCart(productId) {
+    const quantityInput = document.getElementById(`add-quantity-${productId}`);
+    const quantity = parseInt(quantityInput.value) || 1;
+
+    fetch(`/add_to_cart/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ quantity: quantity })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`add-section-${productId}`).style.display = 'none';
+            document.getElementById(`qty-section-${productId}`).style.display = 'flex';
+            document.getElementById(`qty-quantity-${productId}`).value = quantity;
+            updateCartVisibility();
+        }
+    });
+}
+
+function changeQty(productId, delta) {
+    const qtyInput = document.getElementById(`qty-quantity-${productId}`);
+    let qty = parseInt(qtyInput.value) + delta;
+    if (qty < 0) qty = 0;
+    qtyInput.value = qty;
+
+    fetch(`/update_cart/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ quantity: qty })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (qty === 0) {
+            document.getElementById(`add-section-${productId}`).style.display = 'block';
+            document.getElementById(`qty-section-${productId}`).style.display = 'none';
+        }
+
+        const viewCartBtn = document.getElementById('view-cart-btn');
+        if (data.cart_empty) {
+            viewCartBtn.style.display = 'none';
+        } else {
+            viewCartBtn.style.display = 'inline-block';
+        }
+    })
+    .catch(err => {
+        console.error("Cart update failed", err);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartVisibility();
+});
+</script>
+
+<div class="container py-4">
+    <div class="text-end mb-3" style="min-height: 50px;">
+        <a href="{% url 'view_cart' %}" id="view-cart-btn" class="btn btn-outline-light"
+           style="{% if cart|length > 0 %}display: inline-block;{% else %}display: none;{% endif %}">
+            🛒 View Cart
+        </a>
+    </div>
+
+    <a href="{% url 'home' %}" class="btn btn-outline-light mb-3">⬅️ Back to Home</a>
+
+    <h2 class="text-center mb-4 text-white">🌿 Our Eco-Friendly Areca Products</h2>
+
+    <div class="row">
+        {% for product in products %}
+            {% with cart|get_item:product.id as quantity_in_cart %}
+            <div class="col-md-4 mb-4 d-flex align-items-stretch">
+                <div class="card shadow-sm w-100">
+                    <div class="text-center p-3" style="height: 220px; overflow: hidden;">
+                        <img src="{{ product.image.url }}" class="img-fluid h-100 object-fit-contain" alt="{{ product.name }}" style="max-height: 200px;">
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text fw-bold text-light">₹{{ product.price }}</p>
+
+                        <!-- Add to Cart Section -->
+                        <div id="add-section-{{ product.id }}" {% if quantity_in_cart %}style="display: none;"{% endif %}>
+                            <input type="hidden" id="add-quantity-{{ product.id }}" value="1">
+                            <button class="btn btn-success w-100" onclick="addToCart({{ product.id }})">Add to Cart</button>
+                        </div>
+
+                        <!-- Quantity Change Section -->
+                        <div id="qty-section-{{ product.id }}" class="product-controls mt-2" {% if not quantity_in_cart %}style="display: none;"{% endif %}>
+                            <button class="btn btn-danger" onclick="changeQty({{ product.id }}, -1)">−</button>
+                            <input type="text" id="qty-quantity-{{ product.id }}" value="{{ quantity_in_cart|default:1 }}" class="form-control" readonly>
+                            <button class="btn btn-success" onclick="changeQty({{ product.id }}, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+        {% empty %}
+            <div class="col-12 text-center text-white">
+                <p>No products are available at the moment.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

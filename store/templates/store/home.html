@@ -1,0 +1,242 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Internal CSS -->
+<style>
+/* General Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url("{% static 'store/images/areca-bg.png' %}") no-repeat center center fixed;
+    background-size: cover;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Glassy Container */
+.glassy-section {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 2.5rem;
+    margin: 2rem auto;
+    color: #222;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hero h1,
+.hero p,
+.hero a {
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+/* CTA Button */
+.cta-button {
+    background-color: #6a1b9a;
+    color: white;
+    padding: 12px 24px;
+    font-size: 1.25rem;
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:hover {
+    transform: scale(1.07);
+    background-color: #7b1fa2;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Images */
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.1);
+}
+
+.areca-usage-img {
+    max-height: 320px;
+    object-fit: contain;
+}
+
+/* Testimonials */
+.testimonial-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+}
+
+.testimonial-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 1rem 1.25rem;
+}
+
+.testimonial-card p {
+    flex-grow: 1;
+    font-style: italic;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.testimonial-card h5 {
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+/* Gallery Section */
+.gallery .gallery-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 1rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery .gallery-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* Final CTA */
+.final-cta {
+    background-color: rgba(74, 20, 140, 0.8);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 12px;
+    margin: 2rem;
+}
+
+.final-cta h3 {
+    font-size: 1.8rem;
+}
+
+.final-cta .btn {
+    font-size: 1.2rem;
+    padding: 10px 25px;
+    margin-top: 1rem;
+    background-color: #ffffff;
+    color: #4a148c;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.final-cta .btn:hover {
+    background-color: #f3e5f5;
+}
+</style>
+
+<!-- Hero Section -->
+<!-- 🌿 Hero Section -->
+<div class="hero">
+    <h1 class="display-4 mb-3">🌿 Welcome to Eco Family</h1>
+    <p class="lead mb-2">
+        Every 🍽️ plate, spoon, and 🍴 fork you choose helps protect our planet. 🌍✨
+    </p>
+    <p class="lead mb-4">
+        Together, let’s nurture nature—one eco-friendly choice at a time. 🌱💚<br>
+        Your decision matters. Let’s make the Earth smile again. 😊🌏
+    </p>
+    <a href="{% url 'product_list' %}" class="btn btn-success">🛒 Select Products to Order</a>
+</div>
+
+<!-- Areca Usage Section -->
+<div class="container py-5">
+    <div class="row align-items-center glassy-section">
+        <div class="col-md-6">
+            <img src="{% static 'store/images/areca_usage.png' %}" alt="Areca Usage" class="img-fluid areca-usage-img">
+        </div>
+        <div class="col-md-6">
+            <h2 class="section-title text-md-start text-center">Why Areca Leaf Products?</h2>
+            <p>Our Areca plates and cutlery are 100% biodegradable, chemical-free, and made from naturally fallen leaves. Perfect for parties, weddings, and eco-conscious living.</p>
+            <p>These products offer the ideal balance between durability and sustainability, ensuring that you don’t compromise on quality while staying environmentally responsible.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Scientific Approval -->
+<div class="container glassy-section text-center">
+    <h2 class="section-title">Scientifically Approved</h2>
+    <p class="mb-4">Our products are backed by environmental scientists for their low carbon footprint, zero plastic content, and 100% biodegradability—ensuring they are as safe for the planet as they are for your plate.</p>
+    <img src="{% static 'store/images/scientist_approval.png' %}" alt="Scientist Approved" class="img-fluid" width="500">
+</div>
+
+<!-- Testimonials Section -->
+<div class="container py-5">
+    <h2 class="section-title">Customer Testimonials</h2>
+    <div class="row">
+        {% for testimonial in testimonials %}
+            <div class="col-md-4 d-flex">
+                <div class="card testimonial-card w-100">
+                    <div class="card-body">
+                        <p>{{ testimonial.text }}</p>
+                        <h5 class="text-muted mb-0">- {{ testimonial.name }}</h5>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Gallery Section -->
+<div class="container py-5 glassy-section gallery">
+    <h2 class="section-title text-center mb-4">From Production to Plate: The Areca Journey</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <img src="{% static 'store/images/areca_palm_leaves.png' %}" alt="Eco Friendly" class="gallery-image">
+        </div>
+        <div class="col-md-4">
+            <img src="{% static 'store/images/manufacturing.png' %}" alt="Manufacturing Process" class="gallery-image">
+        </div>
+        <div class="col-md-4">
+            <img src="{% static 'store/images/happy_customer.png' %}" alt="Happy Customer" class="gallery-image">
+        </div>
+    </div>
+</div>
+
+<!-- Final CTA -->
+<div class="final-cta">
+    <h3>Ready to Order?</h3>
+    <a href="{% url 'product_list' %}" class="btn btn-lg mt-2">Browse Products</a>
+</div>
+
+{% endblock %}
