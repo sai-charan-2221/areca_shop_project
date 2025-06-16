@@ -46,19 +46,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'areca_shop.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',     # Required for MySQL
-        'NAME': 'areca_shop_db',                  # Replace with your actual DB name
-        'USER': 'root',                           # Your DB username
-        'PASSWORD': 'root',                       # Your DB password
-        'HOST': 'localhost',                      # Use '127.0.0.1' if needed
-        'PORT': '3306',                           # Default MySQL port
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+# Detect if running on Render
+RENDER = os.environ.get('RENDER')
+
+if RENDER:
+    # Production: Use PostgreSQL via DATABASE_URL from Render
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),  # Must be set in Render dashboard
+            conn_max_age=600,  # Keep connections alive longer
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # Local development: Use MySQL running on your local machine
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'areca_shop_db',
+            'USER': 'root',
+            'PASSWORD': 'root',
+            'HOST': 'localhost',
+            'PORT': '3306',
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
+
 
 
 AUTH_PASSWORD_VALIDATORS = []
