@@ -1,9 +1,8 @@
 from pathlib import Path
 import os
-import dj_database_url
+import dj_database_url  # Keep if needed elsewhere
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 SECRET_KEY = 'django-insecure-demo-key'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
@@ -49,18 +48,17 @@ WSGI_APPLICATION = 'areca_shop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # Use 'mysql' if using mysqlclient
-        'NAME': 'areca_shop_db',               # Replace with your database name
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',                   # Or your DB host
-        'PORT': '3306',                        # Default MySQL port
+        'ENGINE': 'django.db.backends.mysql',     # Required for MySQL
+        'NAME': 'areca_shop_db',                  # Replace with your actual DB name
+        'USER': 'root',                           # Your DB username
+        'PASSWORD': 'root',                       # Your DB password
+        'HOST': 'localhost',                      # Use '127.0.0.1' if needed
+        'PORT': '3306',                           # Default MySQL port
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
-
 
 
 AUTH_PASSWORD_VALIDATORS = []
@@ -86,13 +84,30 @@ DEFAULT_FROM_EMAIL = 'saicharancherry925@gmail.com'
 RENDER = os.environ.get('RENDER')
 
 if RENDER:
-    DEBUG = False
-    ALLOWED_HOSTS = ['areca-shop-project.onrender.com']
-
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
-
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-
-    print("🚀 ALLOWED_HOSTS =", ALLOWED_HOSTS)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('DB_NAME', 'areca_shop_db'),
+            'USER': os.environ.get('DB_USER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'root'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '3306'),
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'areca_shop_db',
+            'USER': 'root',
+            'PASSWORD': 'root',
+            'HOST': 'localhost',
+            'PORT': '3306',
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
