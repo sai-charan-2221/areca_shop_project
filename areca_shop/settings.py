@@ -106,17 +106,15 @@ RENDER = os.environ.get('RENDER')
 if RENDER:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('DB_NAME', 'areca_shop_db'),
-            'USER': os.environ.get('DB_USER', 'root'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'root'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '3306'),
-            'OPTIONS': {
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            },
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'areca_shop_db',
+            'USER': 'areca_shop_db_user',
+            'PASSWORD': 'veajrGtZHIyWrHepMOKvopp6MKLlPErK',
+            'HOST': 'dpg-d17u0cgdl3ps7396vgd0-a.oregon-postgres.render.com',
+            'PORT': '5432',
         }
     }
+
 else:
     DATABASES = {
         'default': {
