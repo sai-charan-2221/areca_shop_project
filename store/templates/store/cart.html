@@ -3,78 +3,144 @@
 
 {% block content %}
 <style>
+    .cart-container {
+        background-color: rgba(255, 255, 255, 0.07);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        color: #fff;
+    }
+
+    .table th, .table td {
+        vertical-align: middle !important;
+    }
+
+    .table {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table thead {
+        background-color: rgba(0, 0, 0, 0.15);
+    }
+
     .quantity-controls {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        gap: 8px;
     }
+
     .quantity-controls button {
-        width: 30px;
-        height: 30px;
-        padding: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .btn-icon {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-remove {
+        background-color: #dc3545;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 6px;
+        color: white;
+        font-size: 14px;
+    }
+
+    .btn-remove:hover {
+        background-color: #c82333;
+    }
+
+    .btn-nav {
+        margin-bottom: 20px;
+    }
+    .unit-price,
+    .item-total {
+        display: inline-block;
+        min-width: 60px; /* enough for ₹9999.99 */
+        text-align: center;
+    }
+    .quantity-controls input.quantity {
+    width: 60px;
+    text-align: center;
+    }
+    .empty-cart {
+        text-align: center;
+        font-size: 1.3rem;
+        margin-top: 60px;
+        color: #f8f9fa;
     }
 </style>
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="text-success">
-            <i class="fas fa-shopping-cart"></i> Your Cart
-        </h2>
-        <div>
-            <a href="{% url 'home' %}" class="btn btn-outline-secondary me-2">⬅️ Back to Home</a>
-            <a href="{% url 'product_list' %}" class="btn btn-success">
-                🌿 Select More Products
-            </a>
+<div class="container my-5 cart-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-light"><i class="fas fa-shopping-cart"></i> Your Cart</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'home' %}" class="btn btn-outline-light btn-icon btn-nav">🏠 Home</a>
+            <a href="{% url 'product_list' %}" class="btn btn-success btn-icon btn-nav">🌿 Add More</a>
         </div>
     </div>
 
     {% if cart_items %}
-    <table class="table table-bordered bg-white rounded">
-        <thead class="thead-light">
-            <tr>
-                <th>Product</th>
-                <th style="width: 120px;">Qty</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr data-id="{{ item.product.id }}">
-                <td>{{ item.product.name }}</td>
-                <td class="text-center">
-                    <div class="quantity-controls">
-                        <button class="btn btn-sm btn-secondary decrease">-</button>
-                        <input type="number" value="{{ item.quantity }}" min="1"
-                               class="form-control quantity" style="width: 50px;">
-                        <button class="btn btn-sm btn-secondary increase">+</button>
-                    </div>
-                </td>
-                <td>₹<span class="unit-price">{{ item.product.price|floatformat:2 }}</span></td>
-                <td>₹<span class="item-total">{{ item.subtotal|floatformat:2 }}</span></td>
-                <td>
-                    <form method="post" action="{% url 'view_cart' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
-                        <button name="action" value="remove" class="btn btn-sm btn-danger">Remove</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-borderless text-light align-middle">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Price</th>
+                    <th class="text-center">Total</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr data-id="{{ item.product.id }}">
+                    <td class="fw-semibold">{{ item.product.name }}</td>
+                    <td>
+                        <div class="quantity-controls">
+                            <button class="btn btn-sm btn-outline-light decrease">➖</button>
+                            <input type="number" value="{{ item.quantity }}" min="1"
+                                   class="form-control text-center bg-light text-dark quantity" style="width: 60px;">
+                            <button class="btn btn-sm btn-outline-light increase">➕</button>
+                        </div>
+                    </td>
+                    <td class="text-center">₹<span class="unit-price">{{ item.product.price|floatformat:2 }}</span></td>
+                    <td class="text-center">₹<span class="item-total">{{ item.subtotal|floatformat:2 }}</span></td>
+                    <td class="text-center">
+                        <form method="post" action="{% url 'view_cart' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                            <button name="action" value="remove" class="btn-remove">❌ Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <div class="text-end mt-4">
-        <h4>Total: ₹<span id="cart-total">{{ total|floatformat:2 }}</span></h4>
+        <h4 class="text-white">Total: ₹<span id="cart-total">{{ total|floatformat:2 }}</span></h4>
     </div>
 
-    <div class="text-end">
-        <a href="{% url 'place_order' %}" class="btn btn-primary mt-3">Place Order</a>
+    <div class="text-center mt-4">
+        <a href="{% url 'place_order' %}" class="btn btn-lg btn-success px-5 py-3 fw-bold fs-5 shadow">
+            ✅ Place Order
+        </a>
     </div>
+
 
     {% else %}
-    <p>Your cart is empty. <a href="{% url 'product_list' %}">Start shopping!</a></p>
+    <p class="empty-cart">🛒 Your cart is empty. <br> <a href="{% url 'product_list' %}" class="btn btn-outline-light mt-3">Browse Products</a></p>
     {% endif %}
 </div>
 
@@ -84,36 +150,63 @@ document.addEventListener("DOMContentLoaded", function () {
         let total = 0;
         document.querySelectorAll("tr[data-id]").forEach(row => {
             const price = parseFloat(row.querySelector(".unit-price").textContent);
-            const quantity = parseInt(row.querySelector(".quantity").value);
-            const itemTotal = price * quantity;
+            const qty = parseInt(row.querySelector(".quantity").value);
+            const itemTotal = price * qty;
             row.querySelector(".item-total").textContent = itemTotal.toFixed(2);
             total += itemTotal;
         });
         document.getElementById("cart-total").textContent = total.toFixed(2);
     }
 
-    document.querySelectorAll(".increase").forEach(button => {
-        button.addEventListener("click", function () {
-            const input = this.parentElement.querySelector(".quantity");
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        return document.cookie.split(';').map(c => c.trim())
+            .find(c => c.startsWith(name + '='))?.split('=')[1];
+    }
+
+    function updateBackend(productId, quantity) {
+        fetch(`/update_cart/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.cart_empty) {
+                window.location.reload();
+            }
+        })
+        .catch(err => console.error("Cart update failed:", err));
+    }
+
+    document.querySelectorAll("tr[data-id]").forEach(row => {
+        const productId = row.dataset.id;
+        const input = row.querySelector(".quantity");
+
+        row.querySelector(".increase").addEventListener("click", () => {
             input.value = parseInt(input.value) + 1;
             updateCartTotal();
+            updateBackend(productId, parseInt(input.value));
         });
-    });
 
-    document.querySelectorAll(".decrease").forEach(button => {
-        button.addEventListener("click", function () {
-            const input = this.parentElement.querySelector(".quantity");
-            if (parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
+        row.querySelector(".decrease").addEventListener("click", () => {
+            let qty = parseInt(input.value);
+            if (qty > 1) {
+                input.value = qty - 1;
                 updateCartTotal();
+                updateBackend(productId, parseInt(input.value));
             }
         });
-    });
 
-    document.querySelectorAll(".quantity").forEach(input => {
-        input.addEventListener("change", function () {
-            if (parseInt(this.value) < 1) this.value = 1;
+        input.addEventListener("change", () => {
+            let qty = parseInt(input.value);
+            if (isNaN(qty) || qty < 1) qty = 1;
+            input.value = qty;
             updateCartTotal();
+            updateBackend(productId, qty);
         });
     });
 });

@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.http import JsonResponse
 import json
+from django.contrib import messages
 
 
 def home(request):
@@ -117,24 +118,52 @@ def view_cart(request):
 
 
 def place_order(request):
+    cart = request.session.get('cart', {})
+    if not cart:
+        messages.warning(request, "Cart is empty!")
+        return redirect('view_cart')
+
     if request.method == 'POST':
-        name = request.POST['name']
-        email = request.POST['email']
-        address = request.POST['address']
-        order = Order.objects.create(name=name, email=email, address=address)
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
 
-        cart = request.session.get('cart', {})
-        for product_id, quantity in cart.items():
-            OrderItem.objects.create(order=order, product_id=product_id, quantity=quantity)
+        items = []
+        total = 0
+        for product_id, qty in cart.items():
+            product = Product.objects.get(id=product_id)
+            total += product.price * qty
+            items.append(f"{product.name} x {qty} = ₹{product.price * qty:.2f}")
 
-        send_mail("New Order Received", f"Order from {name}", settings.DEFAULT_FROM_EMAIL,
-                  ['saicharancherry925@gmail.com'])
-        send_mail("Order Confirmation", "Thank you for your order!", settings.DEFAULT_FROM_EMAIL, [email])
+        # Send confirmation email to user
+        message_to_user = f"Hello {name},\n\nThank you for your order!\n\nItems:\n" + \
+                          "\n".join(items) + f"\n\nTotal: ₹{total:.2f}\n\nYour order will be shipped to:\n{address}"
+        send_mail(
+            'Your Order Confirmation - Areca Shop',
+            message_to_user,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
 
+        # Send notification email to admin/receiver
+        message_to_admin = f"New order placed by {name} ({email}, {phone})\n\nItems:\n" + \
+                           "\n".join(items) + f"\n\nTotal: ₹{total:.2f}\nShipping Address:\n{address}"
+        send_mail(
+            'New Order Received - Areca Shop',
+            message_to_admin,
+            settings.DEFAULT_FROM_EMAIL,
+            [settings.DEFAULT_FROM_EMAIL],
+            fail_silently=False,
+        )
+
+        # Clear cart after order
         request.session['cart'] = {}
-        return render(request, 'store/thank_you.html')
 
-    return redirect('view_cart')
+        return redirect('order_success')
+
+    return render(request, 'store/place_order.html')
 
 
 def remove_from_cart(request):
@@ -147,3 +176,7 @@ def remove_from_cart(request):
             return JsonResponse({'success': True})
         return JsonResponse({'success': False, 'error': 'Item not found in cart'})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+def order_success(request):
+    return render(request, 'store/order_success.html')
