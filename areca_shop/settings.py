@@ -87,10 +87,12 @@ RENDER = os.environ.get('RENDER')
 
 if RENDER:
     DEBUG = False
-    ALLOWED_HOSTS = ['store.onrender.com']  # change this after Render gives your URL
+    ALLOWED_HOSTS = ['areca-shop-project.onrender.com']
 
     DATABASES['default'] = dj_database_url.config(conn_max_age=600)
 
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+    print("🚀 ALLOWED_HOSTS =", ALLOWED_HOSTS)
