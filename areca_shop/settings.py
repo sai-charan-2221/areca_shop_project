@@ -74,7 +74,10 @@ else:
         }
     }
 
-
+if RENDER:
+    print("Using PostgreSQL from DATABASE_URL")
+else:
+    print("Using MySQL local DB")
 
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = 'en-us'
