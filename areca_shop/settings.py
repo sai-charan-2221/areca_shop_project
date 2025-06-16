@@ -29,6 +29,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'areca_shop.urls'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEMPLATES = [
     {
@@ -49,10 +50,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'areca_shop.wsgi.application'
 
 # Detect if running on Render
-RENDER = os.environ.get('RENDER')
+RENDER = os.environ.get('RENDER') == 'true'
 
 if RENDER:
     # Production: Use PostgreSQL via DATABASE_URL from Render
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = True
+    CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),  # Must be set in Render dashboard
@@ -101,25 +107,21 @@ EMAIL_HOST_USER = 'sai434562@gmail.com'
 EMAIL_HOST_PASSWORD = 'muelwijrefkszoay'
 DEFAULT_FROM_EMAIL = 'saicharancherry925@gmail.com'
 
-RENDER = os.environ.get('RENDER')
-
 if RENDER:
+    # Use PostgreSQL from DATABASE_URL (Render automatically provides this)
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'areca_shop_db',
-            'USER': 'areca_shop_db_user',
-            'PASSWORD': 'veajrGtZHIyWrHepMOKvopp6MKLlPErK',
-            'HOST': 'dpg-d17u0cgdl3ps7396vgd0-a.oregon-postgres.render.com',
-            'PORT': '5432',
-        }
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-
+    print("✅ Using PostgreSQL from Render")
 else:
+    # Use MySQL for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'areca_shop_db',
+            'NAME': 'areca_shop_db',  # ← no space
             'USER': 'root',
             'PASSWORD': 'root',
             'HOST': 'localhost',
@@ -129,3 +131,4 @@ else:
             },
         }
     }
+    print("✅ Using local MySQL")
