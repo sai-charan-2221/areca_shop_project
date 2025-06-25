@@ -53,21 +53,20 @@ WSGI_APPLICATION = 'areca_shop.wsgi.application'
 RENDER = os.environ.get('RENDER') == 'true'
 
 if RENDER:
-    # Production: Use PostgreSQL via DATABASE_URL from Render
+    print("✅ Using PostgreSQL from Render")
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SECURE = True
     CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
-
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),  # Must be set in Render dashboard
-            conn_max_age=600,  # Keep connections alive longer
-            conn_health_checks=True,
-        )
-    }
 else:
-    # Local development: Use MySQL running on your local machine
+    print("✅ Using local MySQL")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -81,6 +80,7 @@ else:
             },
         }
     }
+
 
 if RENDER:
     print("Using PostgreSQL from DATABASE_URL")
